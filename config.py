@@ -6,10 +6,10 @@ Modify these values according to your requirements.
 """
 
 # LinkedIn Credentials (KEEP THESE SECURE!)
-LINKEDIN_EMAIL = "rishabhsagaryo@gmail.com"# put your linkedin email addresss
-LINKEDIN_PASSWORD = "@Asd123456@@"# put the password
+LINKEDIN_EMAIL = "testing"# put your linkedin email addresss
+LINKEDIN_PASSWORD = "testing"# put the password
 
-API="AIzaSyC8_1tSULwlcrywSLdxfP66aegp1Z3KuL0"# put your gemini api
+API="testing"# put your gemini api
 
 # Scraping Parameters
 COMPANY = "TCS"  #try to give full name excluding Pvt ,Ltd etc
