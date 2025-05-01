@@ -6,15 +6,15 @@ Modify these values according to your requirements.
 """
 
 # LinkedIn Credentials (KEEP THESE SECURE!)
-LINKEDIN_EMAIL = "email@gmail.com"# put your linkedin email addresss
-LINKEDIN_PASSWORD = "password"# put the password
+LINKEDIN_EMAIL = "rishabhsagaryo@gmail.com"# put your linkedin email addresss
+LINKEDIN_PASSWORD = "@Asd123456@@"# put the password
 
-API="TESTING"# put your gemini api
+API="AIzaSyC8_1tSULwlcrywSLdxfP66aegp1Z3KuL0"# put your gemini api
 
 # Scraping Parameters
-COMPANY = "Company name"  #try to give full name excluding Pvt ,Ltd etc
-SEARCH_QUERY = "search parameter" # if want multiple skill give it with comma separated 
-NUMBER_OF_PROFILES = 2
+COMPANY = "TCS"  #try to give full name excluding Pvt ,Ltd etc
+SEARCH_QUERY = "python, java" # if want multiple skill give it with comma separated 
+NUMBER_OF_PROFILES = 10
 
 
 # File Paths

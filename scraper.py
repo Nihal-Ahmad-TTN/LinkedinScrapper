@@ -1,5 +1,4 @@
 
-# Import required modules
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -35,7 +34,7 @@ class LinkedInScraper:
 
     Attributes:
         service (Service): Selenium service object to manage the Firefox WebDriver.
-        driver (webdriver.Firefox): The main browser instance used for automation.
+        driver (Firefox): The main browser instance used for automation.
         wait (WebDriverWait): WebDriverWait object to handle dynamic loading elements.
         COOKIE_FILE (str): File path for storing and retrieving session cookies.
         email (str): LinkedIn email address (should be set before calling `login`).
@@ -52,11 +51,11 @@ class LinkedInScraper:
         education(link, personeDetails): Extracts educational qualifications from a profile.
         subreader(tempDetail): Helper method for nested skill extraction within experience entries.
         experience(link, personeDetails): Extracts professional experience entries including roles, duration, and skills.
-        get_competancy(about, experience): Uses an AI utility to infer a user's core competency based on experience and bio.
+        get_competancy(about, experience,title): Uses an AI utility to infer a user's core competency based on experience and bio.
         get_csv(profiles, output_file): Saves all scraped profile data into a CSV file.
         get_json(profiles): Saves all scraped profile data into a JSON file.
         profilereader(peoples): Reads multiple LinkedIn profiles and aggregates the data.
-        scraper(): Main driver function that orchestrates the scraping workflow, including login, navigation, data collection, and file output.
+        scraper(): Main function that starts the scraping workflow, including login, navigation, data collection, and file output.
 
     Usage:
         To use this class, create an instance of LinkedInScraper, populate the necessary fields 
@@ -72,7 +71,7 @@ class LinkedInScraper:
             scraper.scraper()
 
     Note:
-        This class relies on the presence of the `geckodriver` in the specified path and
+        This class relies on the presence of the `geckodriver` in the specified path('/usr/local/bin/geckodriver') and
         assumes a working Firefox installation. It also expects proper XPath structures,
         which may break if LinkedIn updates their frontend.
         ---------------------------------------------------------------------------------------------------
@@ -273,7 +272,7 @@ class LinkedInScraper:
         personeDetails["Total_Experiance"]=self.exp_count(tempyear)    
         personeDetails["Experience"]= personExpDetails             
 
-    def get_competancy(self,about,experience):
+    def get_competancy(self,about,experience,title):
         """
         Generates a competency summary using external AI utility.
 
@@ -282,9 +281,9 @@ class LinkedInScraper:
             experience (list): List of experience dicts.
 
         Returns:
-            str: Competency summary.
+            str: Competency.
         """
-        return AIdata(experience, about).strip()
+        return AIdata(experience, about,title).strip()
 
 
 
@@ -307,6 +306,7 @@ class LinkedInScraper:
                 'Location': profile.get('Location'),
                 'Total Experience': profile.get('Total_Experiance'),
                 'Competency': profile.get('Competancy'),
+                "Title":profile.get('Title')
             }
             
 
@@ -335,17 +335,23 @@ class LinkedInScraper:
         profiles=[]
         for people in peoples:
             personeDetails={}
-
             self.driver.get(people)
             time.sleep(random.randint(1,5))
+
+
             personeDetails["Profile Link"]=people
             about=""
+            personeDetails["Title"] =""
             try:
                 about = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//section[2]/div[3]/div/div/div/span"))).text
             except Exception as e:
                 pass    
             personeDetails["Name"] = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//span/a/h1"))).text
             print("Scrapping started for this profile :"+ personeDetails["Name"])
+            try:
+                personeDetails["Title"] = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//section/div[2]/div[2]/div/div[2]"))).text
+            except Exception as e:
+                pass    
             personeDetails["Location"]=""
             try:
                 personeDetails["Location"] = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//div[2]/span"))).text
@@ -354,7 +360,7 @@ class LinkedInScraper:
                 pass    
             self.education(people+"/details/education",personeDetails)
             self.experience(people+"/details/experience",personeDetails)
-            personeDetails["Competancy"]=self.get_competancy(about,personeDetails["Experience"])
+            personeDetails["Competancy"]=self.get_competancy(about,personeDetails["Experience"],personeDetails["Title"])
             profiles.append(personeDetails)
             print("Scrapping completed for this profile :"+ personeDetails["Name"] )
 
@@ -423,6 +429,7 @@ class LinkedInScraper:
         count=-1
 
         notMemberCount=0
+        counter=0
         while True:
             count+=1
             
@@ -430,13 +437,15 @@ class LinkedInScraper:
                 profileData=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH,f'//*[@id="org-people-profile-card__profile-image-{count}"]')))
                 temp=profileData.get_attribute('href')
                 if temp is not None:
+                    counter+=1
                     peopleList.append(temp.split("?")[0])
+                    print(counter)
                     if len(peopleList) == self.number:
                         self.profilereader(peopleList)
                         break
             #     else:
             #         notMemberCount+=1
-            #         if (notMemberCount / count) > 0.5 and count >=10:
+            #         if (notMemberCount / count) > 0.5 and count == 10:
             #             raise CustomeException("You doesnt have the network reach to that company please expand your network, then try again")
                         
 
@@ -450,7 +459,11 @@ class LinkedInScraper:
                     loadmore = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[6]/div[3]/div/div[2]/div/div[2]/main/div[2]/div/div/div[2]/div/div[2]/div/button")))
                     loadmore.send_keys(Keys.ENTER)
                 except Exception as e:
-                    break    
+                    if len(peopleList) > 0:
+                        self.profilereader(peopleList)
+                    else:
+                        break    
+                        
             
 
 

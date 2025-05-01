@@ -6,4 +6,6 @@ profiles_json.json
 profiles.csv
 profiles.json
 profilessss.csv
-profiles_csv.csv
+profile_csv.csv
+.gitignore
+.config.py.swp
