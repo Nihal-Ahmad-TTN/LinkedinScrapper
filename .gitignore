@@ -1,0 +1,9 @@
+venv
+__pycache__
+configloader
+cookies.pkl
+profiles_json.json
+profiles.csv
+profiles.json
+profilessss.csv
+profiles_csv.csv
