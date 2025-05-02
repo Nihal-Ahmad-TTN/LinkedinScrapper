@@ -34,15 +34,15 @@ A powerful Python-based tool for automating the extraction of profile data from 
     pip install -r requirements.txt
     ```
 3. Download and install GeckoDriver for Firefox WebDriver
-4. Update the path to geckodriver in the script:
+4. Update the path to geckodriver in the **```scraper.py```** script:
     ```bash
     self.service = Service(executable_path='/path/to/your/geckodriver')
     ```
 
 ## 🚀 Usage
-1. Import the LinkedInScraper class:
+1. Create a python file and Import the LinkedInScraper class:
     ```bash
-    from linkedin_scraper import LinkedInScraper
+    from scraper import LinkedInScraper
     ```
 2. Create an instance and set required parameters:
     ```bash
