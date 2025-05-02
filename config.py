@@ -12,8 +12,8 @@ LINKEDIN_PASSWORD = "testing"# put the password
 API="testing"# put your gemini api
 
 # Scraping Parameters
-COMPANY = "TCS"  #try to give full name excluding Pvt ,Ltd etc
-SEARCH_QUERY = "python, java" # if want multiple skill give it with comma separated 
+COMPANY = "company name"  #try to give full name excluding Pvt ,Ltd etc
+SEARCH_QUERY = "skill name or location" # if want multiple skill give it with comma separated 
 NUMBER_OF_PROFILES = 1 # Number of profiles to scrape (max 100)
 
 
