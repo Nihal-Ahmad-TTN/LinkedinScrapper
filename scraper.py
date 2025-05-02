@@ -17,11 +17,11 @@ import re
 import datetime
 
 logging.basicConfig(filemode='logfile.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-class CustomeException(Exception):
+class NotEnoughNetworkException(Exception):
     """
     Custom exception class to raise user-defined exceptions related to scraping logic.
     """
-    def __init__(self,message):
+    def __init__(self, message):
         super().__init__(message)
 
 
@@ -101,9 +101,9 @@ class LinkedInScraper:
         self.password = ''
         self.company = ''
         self.search_query = ''
-        self.number=""
+        self.number = ''
 
-    def exp_count(self,entries):
+    def exp_count(self, entries):
         logging.info("Calculating total professional experience...")
         """
         Calculates total professional experience from a list of duration strings.
@@ -126,7 +126,7 @@ class LinkedInScraper:
             total_months += year_val * 12 + month_val
         total_years = total_months // 12
         remaining_months = total_months % 12
-        return f"{total_years} yrs, {remaining_months} mos"
+        return f"{total_years} yrs {remaining_months} mos"
 
 
 
@@ -146,7 +146,7 @@ class LinkedInScraper:
         Loads saved cookies into the current browser session.
         """
         self.driver.get("https://www.linkedin.com")
-        time.sleep(random.randint(1,5))
+        time.sleep(random.randint(1, 5))
         with open(self.COOKIE_FILE, "rb") as file:
             cookies = pickle.load(file)
             for cookie in cookies:
@@ -161,7 +161,7 @@ class LinkedInScraper:
         """
         login_url = "https://www.linkedin.com/login"
         self.driver.get(login_url)
-        time.sleep(random.randint(1,5))
+        time.sleep(random.randint(1, 5))
        
         self.driver.maximize_window()
 
@@ -179,7 +179,7 @@ class LinkedInScraper:
 
 
 
-    def education(self, link,personeDetails):
+    def education(self, link, personeDetails):
         logging.info("Extracting educational history...")
         """
         Extracts educational history from a LinkedIn profile.
@@ -190,30 +190,30 @@ class LinkedInScraper:
         """
         tempEducation=[]
         self.driver.get(link)
-        time.sleep(random.randint(1,5))
+        time.sleep(random.randint(1, 5))
 
-        count=0
+        count = 0
         while True:
-            temp={}
+            temp = {}
             try:
-                count+=1
-                tempDegree=""
-                tempSchool=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//li[{count}]/div/div/div[2]/div[1]/a/div/div/div/div/span[1]")))
+                count += 1
+                tempDegree = ""
+                tempSchool = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//li[{count}]/div/div/div[2]/div[1]/a/div/div/div/div/span[1]")))
                 try:
-                    tempDegree=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//li[{count}]/div/div/div[2]/div[1]/a/span/span")))
+                    tempDegree = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//li[{count}]/div/div/div[2]/div[1]/a/span/span")))
                 except Exception as e:
                     pass
-                temp["Institute"]=tempSchool.text
-                temp["Qualification"]=tempDegree.text
+                temp["Institute"] = tempSchool.text
+                temp["Qualification"] = tempDegree.text
             except Exception as e:
                 break 
             tempEducation.append(temp)
-        personeDetails["Education"]=tempEducation
+        personeDetails["Education"] = tempEducation
 
 
 
 
-    def subreader(self,tempDetail):
+    def subreader(self, tempDetail):
         logging.info("Extracting sub-skills from experience...")
         """
         Helper function to extract sub-skills from nested structures under experience.
@@ -221,18 +221,18 @@ class LinkedInScraper:
         Args:
             tempDetail (dict): Experience entry to append skills into.
         """
-        temp=[]
-        for count in range(1,5):
+        temp = []
+        for count in range(1, 5):
             try:
-                skill=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f" /html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[2]/div/div/div[2]/div[2]/ul/li/div/div/div[1]/ul/li[{count}]/div/div/div[2]/div[2]/ul/li[2]/div/ul/li/div/div/div/span[1]")))
+                skill = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[2]/div/div/div[2]/div[2]/ul/li/div/div/div[1]/ul/li[{count}]/div/div/div[2]/div[2]/ul/li[2]/div/ul/li/div/div/div/span[1]")))
                 temp.append(skill.text.split(":")[1].split("·"))
             except Exception as e:
                 pass
-        tempDetail["skill"]=temp
+        tempDetail["skill"] = temp
 
 
 
-    def experience(self, link,personeDetails):
+    def experience(self, link, personeDetails):
         logging.info("Extracting professional experience...")
         """
         Extracts professional experience from a LinkedIn profile.
@@ -242,36 +242,34 @@ class LinkedInScraper:
             personeDetails (dict): Dictionary to append experience data into.
         """
         self.driver.get(link)
-        time.sleep(random.randint(1,5))
+        time.sleep(random.randint(1, 5))
 
-        tempyear=[]
-        personExpDetails=[]
+        tempyear = []
+        personExpDetails = []
         
-        count=0
+        count = 0
         while True:
-            tempDetail={}
+            tempDetail = {}
             try:
-                count+=1
-                skill=""
-                role=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[{count}]/div/div/div[2]/div/a/div/div/div/div/span[1]")))
-                company=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[{count}]/div/div/div[2]/div/a/span[1]/span[1]")))
-                year=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[{count}]/div/div/div[2]/div/a/span[2]/span[1]")))
-                tempDetail["role"]=role.text
-                tempDetail["company"]=company.text.split("·")[0]
-                tempDetail["year"]=year.text.split("·")[1]
+                count += 1
+                skill = ""
+                role = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[{count}]/div/div/div[2]/div/a/div/div/div/div/span[1]")))
+                company = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[{count}]/div/div/div[2]/div/a/span[1]/span[1]")))
+                year = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[{count}]/div/div/div[2]/div/a/span[2]/span[1]")))
+                tempDetail["role"] = role.text
+                tempDetail["company"] = company.text.split("·")[0]
+                tempDetail["year"] = year.text.split("·")[1]
                 try:
-                    skill=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//li[{count}]/div/div/div[2]/div[2]/ul/li[2]/div/ul/li/div/div/div/span")))
-                    tempDetail["skill"]=skill.text.split(":")[1].split("·")
+                    skill = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//li[{count}]/div/div/div[2]/div[2]/ul/li[2]/div/ul/li/div/div/div/span")))
+                    tempDetail["skill"] = skill.text.split(":")[1].split("·")
                 except Exception as e:
                         pass     
             except Exception as e:
                 try:
-                    company=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[{count}]/div/div/div[2]/div[1]/a/div/div/div/div/span[1]")))
-                    year=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[{count}]/div/div/div[2]/div[1]/a/span/span[1]")))
-                    tempDetail["company"]=company.text.split("·")[0]
-                    tempDetail["year"]=year.text.split("·")[1]
-                    
-
+                    company = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[{count}]/div/div/div[2]/div[1]/a/div/div/div/div/span[1]")))
+                    year = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[{count}]/div/div/div[2]/div[1]/a/span/span[1]")))
+                    tempDetail["company"] = company.text.split("·")[0]
+                    tempDetail["year"] = year.text.split("·")[1]
                     self.subreader(tempDetail) 
 
                 except Exception as e:
@@ -279,10 +277,10 @@ class LinkedInScraper:
             tempyear.append(tempDetail["year"])
             personExpDetails.append(tempDetail)
      
-        personeDetails["Total_Experiance"]=self.exp_count(tempyear)    
-        personeDetails["Experience"]= personExpDetails             
+        personeDetails["Total_Experiance"] = self.exp_count(tempyear)    
+        personeDetails["Experience"] = personExpDetails             
 
-    def get_competancy(self,about,experience,title):
+    def get_competancy(self, about, experience,title):
         logging.info("Generating competency summary using AI...")
         """
         Generates a competency summary using external AI utility.
@@ -294,7 +292,7 @@ class LinkedInScraper:
         Returns:
             str: Competency.
         """
-        return AIdata(experience, about,title).strip()
+        return AIdata(experience, about, title).strip()
 
 
 
@@ -335,8 +333,9 @@ class LinkedInScraper:
             flat_data.append(base)
 
         df = pd.DataFrame(flat_data)
-        df.to_csv(f"{self.company}_{self.search_query}_{datetime.datetime.now()}.csv", index=False)
-        print(f"CSV file is made with name {self.company}_{self.search_query}_{datetime.datetime.now()}")
+        filename = f"{self.company}_{self.search_query}_{datetime.datetime.now()}.csv"
+        df.to_csv(filename, index=False)
+        print(f"CSV file is saved with name " + filename)
         
 
 
@@ -345,37 +344,41 @@ class LinkedInScraper:
         """
         Saves the scraped profiles data as a JSON file.
         """
-        profiles=[]
+        profiles = []
         for people in peoples:
-            personeDetails={}
+            personeDetails = {}
             self.driver.get(people)
-            time.sleep(random.randint(1,5))
+            time.sleep(random.randint(1, 5))
 
+            personeDetails["Profile Link"] = people
+            about = ""
+            personeDetails["Title"] = ""
 
-            personeDetails["Profile Link"]=people
-            about=""
-            personeDetails["Title"] =""
             try:
                 about = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//section[2]/div[3]/div/div/div/span"))).text
             except Exception as e:
                 pass    
+
             personeDetails["Name"] = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//span/a/h1"))).text
-            print("Scrapping started for this profile :"+ personeDetails["Name"])
+            print("Scrapping started for this profile :" + personeDetails["Name"])
+
             try:
                 personeDetails["Title"] = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//section/div[2]/div[2]/div/div[2]"))).text
             except Exception as e:
                 pass    
-            personeDetails["Location"]=""
+
+            personeDetails["Location"] = ""
             try:
                 personeDetails["Location"] = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//div[2]/span"))).text
 
             except Exception as e:
                 pass    
-            self.education(people+"/details/education",personeDetails)
-            self.experience(people+"/details/experience",personeDetails)
-            personeDetails["Competancy"]=self.get_competancy(about,personeDetails["Experience"],personeDetails["Title"])
+
+            self.education(people + "/details/education", personeDetails)
+            self.experience(people + "/details/experience", personeDetails)
+            personeDetails["Competancy"] = self.get_competancy(about, personeDetails["Experience"], personeDetails["Title"])
             profiles.append(personeDetails)
-            print("Scrapping completed for this profile :"+ personeDetails["Name"] )
+            print("Scrapping completed for this profile :" + personeDetails["Name"])
 
         self.get_json(profiles)
         self.get_csv(profiles)
@@ -391,7 +394,7 @@ class LinkedInScraper:
         """
         with open(f"{self.company}_{self.search_query}_{datetime.datetime.now()}.json", 'w') as file:
             json.dump(profiles, file, indent=4)
-        print("Json file is made with name profiles_json.json")
+        print(f"Json file is saved with name " + file.name)
 
     def scraper(self):
         logging.info("Starting the scraping process...")
@@ -412,10 +415,9 @@ class LinkedInScraper:
         else:
             print("[*] No cookie file found. Logging in manually...")
             self.login()    
-            time.sleep(20)
+            time.sleep(30)
             self.save_cookies()
-
-            time.sleep(20)
+            time.sleep(random.randint(5, 10))
 
         # Search for the company
         submitBTN = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, '/html/body/div[6]/header/div/div/div/div[1]/input')))
@@ -425,7 +427,7 @@ class LinkedInScraper:
         # Filter for companies, select first result, go to "People"
         selectCompany = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//button[text()='Companies']")))
         selectCompany.send_keys(Keys.ENTER)
-        time.sleep(random.randint(1,5))
+        time.sleep(random.randint(1, 5))
 
         chooseCompany = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//div/span/span/a")))
         chooseCompany.send_keys(Keys.ENTER)
@@ -440,31 +442,31 @@ class LinkedInScraper:
 
 
         # Scrape people links
-        peopleList=[]
-        count=-1
+        peopleList = []
+        count =- 1
 
-        notMemberCount=0
-        counter=0
+        notMemberCount = 0
+        counter = 0
         while True:
-            count+=1
+            count += 1
             
             try:
-                profileData=self.wait.until(expected_conditions.presence_of_element_located((By.XPATH,f'//*[@id="org-people-profile-card__profile-image-{count}"]')))
-                temp=profileData.get_attribute('href')
+                profileData = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f'//*[@id="org-people-profile-card__profile-image-{count}"]')))
+                temp = profileData.get_attribute('href')
                 if temp is not None:
-                    counter+=1
+                    counter += 1
                     peopleList.append(temp.split("?")[0])
                     print(counter)
                     if len(peopleList) == self.number:
                         self.profilereader(peopleList)
                         break
             #     else:
-            #         notMemberCount+=1
+            #         notMemberCount += 1
             #         if (notMemberCount / count) > 0.5 and count == 10:
-            #             raise CustomeException("You doesnt have the network reach to that company please expand your network, then try again")
+            #             raise NotEnoughNetworkException("You doesnt have the network reach to that company please expand your network then try again")
                         
 
-            # except CustomeException as e:
+            # except NotEnoughNetworkException as e:
             #     print(e)
             #     break
 
