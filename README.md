@@ -58,6 +58,9 @@ A powerful Python-based tool for automating the extraction of profile data from 
     scraper.scraper()
     ```
 
+    ### Note:
+    - If you dont want to do all the steps above then you can directly execute the ```main.py``` file.
+
 ## 📊 Output
 - The scraper generates two output files:
 

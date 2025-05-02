@@ -6,31 +6,32 @@ Modify these values according to your requirements.
 """
 
 import random
-# LinkedIn Credentials (KEEP THESE SECURE!)
-LINKEDIN_EMAIL = "testing"# put your linkedin email addresss
-LINKEDIN_PASSWORD = "testing"# put the password
 
-API="testing"# put your gemini api
-
-# Scraping Parameters
-COMPANY = "company name"  #try to give full name excluding Pvt ,Ltd etc
-SEARCH_QUERY = "skill name or location" # if want multiple skill give it with comma separated 
-NUMBER_OF_PROFILES = 1 # Number of profiles to scrape (max 100)
-
+# API Key for Gemini AI
+# Replace with your actual API key
+# Ensure you have the required permissions and usage limits for the API
+API="test"
 
 # File Paths
+# Path to the Cookie file where scraped data will be saved
 COOKIE_FILE = "cookies.pkl"  
 
+
+# Randomized delays to mimic human behavior and avoid detection
+# These delays are in seconds and can be adjusted as needed
+# The delays are randomized to make the scraping process less predictable and more human-like.
 DELAYS = {
-    "search": random.randint(1, 5),  # Delay on homepage before searching
-    "search_results": random.randint(1, 5),  # Delay after search results load
-    "people_page": random.randint(1, 5),  # Delay after loading profile page
-    "search_query": random.randint(5, 10),  # Delay before entering the search keywords
-    "load_more": random.randint(10, 20),  # Delay after search
-    "profile": random.randint(10, 20),  # Delay before profile scraping
-    "scroll": random.randint(1, 5),  # Delay after scrolling
-    "education": random.randint(10, 20),  # Delay befoe education scraping
-    "experience": random.randint(10, 20),  # Delay before experience scraping
-    "skills": random.randint(1, 10),  # Delay after skills scraping
+    "login_page": random.randint(3, 10), 
+    "security_check": random.randint(30, 60),
+    "search": random.randint(3, 10),
+    "search_results": random.randint(3, 10),
+    "people_page": random.randint(3, 5),
+    "search_query": random.randint(5, 10),
+    "load_more": random.randint(5, 10),
+    "profile": random.randint(5, 10),
+    "scroll": random.randint(1, 3),
+    "education": random.randint(10, 20),
+    "experience": random.randint(10, 20),
+    "skills": random.randint(3, 5),
 }
 

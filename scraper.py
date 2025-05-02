@@ -7,16 +7,16 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.firefox.service import Service
 import pandas as pd
 from utils import AIdata
+import config
 import json
 import time
 import pickle
 import os
-import random
 import logging
 import re
 import datetime
 
-logging.basicConfig(filemode='logfile.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+# logging.basicConfig(filemode='logfile.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 class NotEnoughNetworkException(Exception):
     """
     Custom exception class to raise user-defined exceptions related to scraping logic.
@@ -89,7 +89,7 @@ class LinkedInScraper:
     """
 
     def __init__(self):
-        logging.info("Initializing LinkedInScraper...")
+        # logging.info("Initializing LinkedInScraper...")
         """
         Initializes the Firefox WebDriver, sets WebDriverWait, and defines the cookie file path.
         """
@@ -104,7 +104,7 @@ class LinkedInScraper:
         self.number = ''
 
     def exp_count(self, entries):
-        logging.info("Calculating total professional experience...")
+        # logging.info("Calculating total professional experience...")
         """
         Calculates total professional experience from a list of duration strings.
 
@@ -131,7 +131,7 @@ class LinkedInScraper:
 
 
     def save_cookies(self):
-        logging.info("Saving cookies to file...")
+        # logging.info("Saving cookies to file...")
         """
         Saves the current browser session cookies to a file.
         """
@@ -141,12 +141,12 @@ class LinkedInScraper:
 
 
     def load_cookies(self):
-        logging.info("Loading cookies from file...")
+        # logging.info("Loading cookies from file...")
         """
         Loads saved cookies into the current browser session.
         """
         self.driver.get("https://www.linkedin.com")
-        time.sleep(random.randint(1, 5))
+        time.sleep(config.DELAYS["login_page"])
         with open(self.COOKIE_FILE, "rb") as file:
             cookies = pickle.load(file)
             for cookie in cookies:
@@ -155,13 +155,13 @@ class LinkedInScraper:
 
 
     def login(self):
-        logging.info("Logging into LinkedIn...")
+        # logging.info("Logging into LinkedIn...")
         """
         Logs into LinkedIn using credentials
         """
         login_url = "https://www.linkedin.com/login"
         self.driver.get(login_url)
-        time.sleep(random.randint(1, 5))
+        time.sleep(config.DELAYS["login_page"])
        
         self.driver.maximize_window()
 
@@ -172,7 +172,9 @@ class LinkedInScraper:
         password.clear()
 
         username.send_keys(self.email)
+        time.sleep(1)
         password.send_keys(self.password)
+        time.sleep(1)
 
         logButton = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div/main/div[2]/div[1]/form/div[4]/button")))
         logButton.send_keys(Keys.ENTER)
@@ -180,7 +182,7 @@ class LinkedInScraper:
 
 
     def education(self, link, personeDetails):
-        logging.info("Extracting educational history...")
+        # logging.info("Extracting educational history...")
         """
         Extracts educational history from a LinkedIn profile.
 
@@ -190,7 +192,7 @@ class LinkedInScraper:
         """
         tempEducation=[]
         self.driver.get(link)
-        time.sleep(random.randint(1, 5))
+        time.sleep(config.DELAYS["education"])
 
         count = 0
         while True:
@@ -214,7 +216,7 @@ class LinkedInScraper:
 
 
     def subreader(self, tempDetail):
-        logging.info("Extracting sub-skills from experience...")
+        # logging.info("Extracting sub-skills from experience...")
         """
         Helper function to extract sub-skills from nested structures under experience.
 
@@ -233,7 +235,7 @@ class LinkedInScraper:
 
 
     def experience(self, link, personeDetails):
-        logging.info("Extracting professional experience...")
+        # logging.info("Extracting professional experience...")
         """
         Extracts professional experience from a LinkedIn profile.
 
@@ -242,7 +244,7 @@ class LinkedInScraper:
             personeDetails (dict): Dictionary to append experience data into.
         """
         self.driver.get(link)
-        time.sleep(random.randint(1, 5))
+        time.sleep(config.DELAYS["experience"])
 
         tempyear = []
         personExpDetails = []
@@ -260,6 +262,7 @@ class LinkedInScraper:
                 tempDetail["company"] = company.text.split("·")[0]
                 tempDetail["year"] = year.text.split("·")[1]
                 try:
+                    time.sleep(config.DELAYS["skills"])
                     skill = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//li[{count}]/div/div/div[2]/div[2]/ul/li[2]/div/ul/li/div/div/div/span")))
                     tempDetail["skill"] = skill.text.split(":")[1].split("·")
                 except Exception as e:
@@ -281,7 +284,7 @@ class LinkedInScraper:
         personeDetails["Experience"] = personExpDetails             
 
     def get_competancy(self, about, experience,title):
-        logging.info("Generating competency summary using AI...")
+        # logging.info("Generating competency summary using AI...")
         """
         Generates a competency summary using external AI utility.
 
@@ -298,7 +301,7 @@ class LinkedInScraper:
 
 
     def get_csv(self, profiles):
-        logging.info("Exporting data to CSV...")
+        # logging.info("Exporting data to CSV...")
         """
         Exports scraped data into a CSV file.
 
@@ -340,7 +343,7 @@ class LinkedInScraper:
 
 
     def profilereader(self, peoples):
-        logging.info("Reading and scraping individual LinkedIn profiles...")
+        # logging.info("Reading and scraping individual LinkedIn profiles...")
         """
         Saves the scraped profiles data as a JSON file.
         """
@@ -348,7 +351,7 @@ class LinkedInScraper:
         for people in peoples:
             personeDetails = {}
             self.driver.get(people)
-            time.sleep(random.randint(1, 5))
+            time.sleep(config.DELAYS["profile"])
 
             personeDetails["Profile Link"] = people
             about = ""
@@ -373,7 +376,7 @@ class LinkedInScraper:
 
             except Exception as e:
                 pass    
-
+            
             self.education(people + "/details/education", personeDetails)
             self.experience(people + "/details/experience", personeDetails)
             personeDetails["Competancy"] = self.get_competancy(about, personeDetails["Experience"], personeDetails["Title"])
@@ -385,7 +388,7 @@ class LinkedInScraper:
 
 
     def get_json(self, profiles):
-        logging.info("Exporting data to JSON...")
+        # logging.info("Exporting data to JSON...")
         """
         Reads and parses individual LinkedIn profiles.
 
@@ -397,7 +400,7 @@ class LinkedInScraper:
         print(f"Json file is saved with name " + file.name)
 
     def scraper(self):
-        logging.info("Starting the scraping process...")
+        # logging.info("Starting the scraping process...")
         """
         Main function to handle navigation and scraping workflow on LinkedIn.
         """
@@ -406,20 +409,19 @@ class LinkedInScraper:
         if os.path.exists(self.COOKIE_FILE):
             print("[*] Loading cookies...")
             self.driver.maximize_window()
-        
             self.load_cookies()
-           
             self.driver.refresh()
             
 
         else:
             print("[*] No cookie file found. Logging in manually...")
             self.login()    
-            time.sleep(30)
+            time.sleep(config.DELAYS["security_check"])
             self.save_cookies()
-            time.sleep(random.randint(5, 10))
+            
 
         # Search for the company
+        time.sleep(config.DELAYS["search"])
         submitBTN = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, '/html/body/div[6]/header/div/div/div/div[1]/input')))
         submitBTN.clear()
         submitBTN.send_keys(self.company + Keys.ENTER)
@@ -427,15 +429,17 @@ class LinkedInScraper:
         # Filter for companies, select first result, go to "People"
         selectCompany = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//button[text()='Companies']")))
         selectCompany.send_keys(Keys.ENTER)
-        time.sleep(random.randint(1, 5))
 
+        time.sleep(config.DELAYS['search_results'])
         chooseCompany = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//div/span/span/a")))
         chooseCompany.send_keys(Keys.ENTER)
-        
+
+        time.sleep(config.DELAYS['people_page'])
         companyPeople = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//a[text()='People']")))
         companyPeople.send_keys(Keys.ENTER)
 
         # Filter employees by skill (e.g., Java)
+        time.sleep(config.DELAYS['search_query'])
         selectPeople = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//div/textarea")))
         selectPeople.clear()
         selectPeople.send_keys(self.search_query + Keys.ENTER)
@@ -443,14 +447,15 @@ class LinkedInScraper:
 
         # Scrape people links
         peopleList = []
-        count =- 1
-
+        count = -1
         notMemberCount = 0
         counter = 0
+
         while True:
             count += 1
             
             try:
+                time.sleep(config.DELAYS['scroll'])
                 profileData = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f'//*[@id="org-people-profile-card__profile-image-{count}"]')))
                 temp = profileData.get_attribute('href')
                 if temp is not None:
@@ -473,8 +478,10 @@ class LinkedInScraper:
 
             except Exception as e:
                 try:
+                    time.sleep(config.DELAYS["load_more"])
                     loadmore = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[6]/div[3]/div/div[2]/div/div[2]/main/div[2]/div/div/div[2]/div/div[2]/div/button")))
                     loadmore.send_keys(Keys.ENTER)
+
                 except Exception as e:
                     if len(peopleList) > 0:
                         self.profilereader(peopleList)
