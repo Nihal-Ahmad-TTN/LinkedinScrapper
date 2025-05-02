@@ -17,7 +17,7 @@ while linkedin.number >100 and linkedin.number<=0:
     linkedin.number=int(input("Enter the total number of profile you want to scrape, note that the numb er should not exceed 100"))
 
 linkedin.search_query = config.SEARCH_QUERY
-
 linkedin.COOKIE_FILE = config.COOKIE_FILE
+
 print(f"Scrapping for the following details- Company: {config.COMPANY}\nNumber:{config.NUMBER_OF_PROFILES}\nSearh Query:{ config.SEARCH_QUERY}")
 linkedin.scraper()

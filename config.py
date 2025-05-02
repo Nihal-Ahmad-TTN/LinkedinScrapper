@@ -14,7 +14,7 @@ API="testing"# put your gemini api
 # Scraping Parameters
 COMPANY = "TCS"  #try to give full name excluding Pvt ,Ltd etc
 SEARCH_QUERY = "python, java" # if want multiple skill give it with comma separated 
-NUMBER_OF_PROFILES = 10
+NUMBER_OF_PROFILES = 1 # Number of profiles to scrape (max 100)
 
 
 # File Paths

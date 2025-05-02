@@ -12,9 +12,11 @@ import time
 import pickle
 import os
 import random
+import logging
 import re
+import datetime
 
-
+logging.basicConfig(filemode='logfile.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 class CustomeException(Exception):
     """
     Custom exception class to raise user-defined exceptions related to scraping logic.
@@ -87,6 +89,7 @@ class LinkedInScraper:
     """
 
     def __init__(self):
+        logging.info("Initializing LinkedInScraper...")
         """
         Initializes the Firefox WebDriver, sets WebDriverWait, and defines the cookie file path.
         """
@@ -101,6 +104,7 @@ class LinkedInScraper:
         self.number=""
 
     def exp_count(self,entries):
+        logging.info("Calculating total professional experience...")
         """
         Calculates total professional experience from a list of duration strings.
 
@@ -127,6 +131,7 @@ class LinkedInScraper:
 
 
     def save_cookies(self):
+        logging.info("Saving cookies to file...")
         """
         Saves the current browser session cookies to a file.
         """
@@ -136,6 +141,7 @@ class LinkedInScraper:
 
 
     def load_cookies(self):
+        logging.info("Loading cookies from file...")
         """
         Loads saved cookies into the current browser session.
         """
@@ -149,6 +155,7 @@ class LinkedInScraper:
 
 
     def login(self):
+        logging.info("Logging into LinkedIn...")
         """
         Logs into LinkedIn using credentials
         """
@@ -173,6 +180,7 @@ class LinkedInScraper:
 
 
     def education(self, link,personeDetails):
+        logging.info("Extracting educational history...")
         """
         Extracts educational history from a LinkedIn profile.
 
@@ -206,6 +214,7 @@ class LinkedInScraper:
 
 
     def subreader(self,tempDetail):
+        logging.info("Extracting sub-skills from experience...")
         """
         Helper function to extract sub-skills from nested structures under experience.
 
@@ -224,6 +233,7 @@ class LinkedInScraper:
 
 
     def experience(self, link,personeDetails):
+        logging.info("Extracting professional experience...")
         """
         Extracts professional experience from a LinkedIn profile.
 
@@ -273,6 +283,7 @@ class LinkedInScraper:
         personeDetails["Experience"]= personExpDetails             
 
     def get_competancy(self,about,experience,title):
+        logging.info("Generating competency summary using AI...")
         """
         Generates a competency summary using external AI utility.
 
@@ -288,7 +299,8 @@ class LinkedInScraper:
 
 
 
-    def get_csv(self, profiles, output_file='profile_csv.csv'):
+    def get_csv(self, profiles):
+        logging.info("Exporting data to CSV...")
         """
         Exports scraped data into a CSV file.
 
@@ -323,12 +335,13 @@ class LinkedInScraper:
             flat_data.append(base)
 
         df = pd.DataFrame(flat_data)
-        df.to_csv(output_file, index=False)
-        print(f"CSV file is made with name {output_file}")
+        df.to_csv(f"{self.company}_{self.search_query}_{datetime.datetime.now()}.csv", index=False)
+        print(f"CSV file is made with name {self.company}_{self.search_query}_{datetime.datetime.now()}")
         
 
 
     def profilereader(self, peoples):
+        logging.info("Reading and scraping individual LinkedIn profiles...")
         """
         Saves the scraped profiles data as a JSON file.
         """
@@ -369,17 +382,19 @@ class LinkedInScraper:
 
 
     def get_json(self, profiles):
+        logging.info("Exporting data to JSON...")
         """
         Reads and parses individual LinkedIn profiles.
 
         Args:
             peoples (list): List of profile URLs.
         """
-        with open('profiles_json.json', 'w') as file:
+        with open(f"{self.company}_{self.search_query}_{datetime.datetime.now()}.json", 'w') as file:
             json.dump(profiles, file, indent=4)
         print("Json file is made with name profiles_json.json")
 
     def scraper(self):
+        logging.info("Starting the scraping process...")
         """
         Main function to handle navigation and scraping workflow on LinkedIn.
         """
