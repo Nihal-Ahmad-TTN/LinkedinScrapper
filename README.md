@@ -59,7 +59,17 @@ A powerful Python-based tool for automating the extraction of profile data from 
     ```
 
     ### Note:
-    - If you dont want to do all the steps above then you can directly execute the ```main.py``` file.
+    - If you dont want to do all the steps above then you can directly execute the **```main.py```** file by writing the following command on terminal.
+        - For Linux or Mac users:
+            ```bash
+            python3 main.py
+            ```
+        - For Windows users:
+            ```bash
+            python main.py
+            ```
+
+
 
 ## 📊 Output
 - The scraper generates two output files:
