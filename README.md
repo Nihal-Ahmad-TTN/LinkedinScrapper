@@ -7,7 +7,7 @@ A powerful Python-based tool for automating the extraction of profile data from 
 - **Automated LinkedIn Login**: Supports both manual login and cookie-based session persistence
 - **Company & Skills Targeting**: Search for employees at specific companies with particular skills
 - **Comprehensive Data Extraction**:
-  - Personal details (name, location)
+  - Personal details (name, title, location)
   - Professional experience (roles, companies, duration)
   - Educational qualifications
   - Skills
