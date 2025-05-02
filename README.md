@@ -61,8 +61,8 @@ A powerful Python-based tool for automating the extraction of profile data from 
 ## 📊 Output
 - The scraper generates two output files:
 
-    - **<comapny_name>_<search_keyword>_<date_time>.csv:** Contains profile data in CSV format
-    - **<comapny_name>_<search_keyword>_<date_time>.json:** Contains complete profile data in JSON format
+    - **<comapny_name>\_<search_keyword>\_<date_time>.csv:** Contains profile data in CSV format
+    - **<comapny_name>\_<search_keyword>\_<date_time>.json:** Contains complete profile data in JSON format
 
 ## ⚠️ Important Limitations
 - **Rate Limiting:** LinkedIn employs request frequency tracking per IP. Excessive scraping can lead to temporary or permanent bans. It's advised to:
