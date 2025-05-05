@@ -366,6 +366,11 @@ class LinkedInScraper:
                 for exp in profile.get('Experience', [])
             )
 
+            base['Contact_info'] = '; '.join(
+                f"{key}: {value}" 
+                for key, value in profile.get('Contact_info', {}).items()
+            )
+
             flat_data.append(base)
 
         df = pd.DataFrame(flat_data)
