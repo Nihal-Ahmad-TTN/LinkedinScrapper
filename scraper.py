@@ -50,6 +50,7 @@ class LinkedInScraper:
         save_cookies(): Saves the current session cookies to a file to enable session persistence.
         load_cookies(): Loads previously saved cookies into the browser session.
         login(): Logs into LinkedIn using provided credentials and saves the session cookies.
+        get_contact_info(link, personeDetails): Extracts contact information from a profile.
         education(link, personeDetails): Extracts educational qualifications from a profile.
         subreader(tempDetail): Helper method for nested skill extraction within experience entries.
         experience(link, personeDetails): Extracts professional experience entries including roles, duration, and skills.
