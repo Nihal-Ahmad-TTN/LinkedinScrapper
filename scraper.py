@@ -181,6 +181,14 @@ class LinkedInScraper:
 
 
     def get_contact_info(self, link, personDetails):
+        """
+        Extracts contact information from a LinkedIn profile.
+
+        Args:
+            link (str): Direct URL to the contact info section.
+            personeDetails (dict): Dictionary to append contact data into.
+        """
+        # logging.info("Extracting contact information...")
         self.driver.get(link)
         contact_info = {}
         count = 0
