@@ -180,6 +180,38 @@ class LinkedInScraper:
         logButton.send_keys(Keys.ENTER)
 
 
+    def get_contact_info(self, link, personDetails):
+        self.driver.get(link)
+        contact_info = {}
+        count = 0
+        while True:
+            count += 1    
+            try:
+                
+                heading = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//section/div/section[{count}]/h3"))).text
+                print("got heading")
+
+                try:
+                    content = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//section/div/section[{count}]/div/a"))).text
+                except Exception as e:
+                    try:
+                        content = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//section/div/section[{count}]/div/span"))).text
+                    except Exception as e:
+                        try:
+                            content = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//section/div/section[{count}]/ul/li/span[1]"))).text
+                        except Exception as e:
+                            pass
+                
+                contact_info[f'{heading}'] = content
+
+            except Exception as e:
+                break
+        
+        personDetails['Contact_info'] = contact_info
+        print(personDetails['contact_info'])
+
+
+
 
     def education(self, link, personeDetails):
         # logging.info("Extracting educational history...")
@@ -212,25 +244,6 @@ class LinkedInScraper:
             tempEducation.append(temp)
         personeDetails["Education"] = tempEducation
 
-
-
-
-    def subreader(self, tempDetail):
-        # logging.info("Extracting sub-skills from experience...")
-        """
-        Helper function to extract sub-skills from nested structures under experience.
-
-        Args:
-            tempDetail (dict): Experience entry to append skills into.
-        """
-        temp = []
-        for count in range(1, 5):
-            try:
-                skill = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[2]/div/div/div[2]/div[2]/ul/li/div/div/div[1]/ul/li[{count}]/div/div/div[2]/div[2]/ul/li[2]/div/ul/li/div/div/div/span[1]")))
-                temp.append(skill.text.split(":")[1].split("·"))
-            except Exception as e:
-                pass
-        tempDetail["skill"] = temp
 
 
 
@@ -298,6 +311,17 @@ class LinkedInScraper:
         return AIdata(experience, about, title).strip()
 
 
+    def get_json(self, profiles):
+        # logging.info("Exporting data to JSON...")
+        """
+        Reads and parses individual LinkedIn profiles.
+
+        Args:
+            peoples (list): List of profile URLs.
+        """
+        with open(f"{self.company}_{self.search_query}_{datetime.datetime.now()}.json", 'w') as file:
+            json.dump(profiles, file, indent=4)
+        print(f"Json file is saved with name " + file.name)
 
 
     def get_csv(self, profiles):
@@ -339,7 +363,27 @@ class LinkedInScraper:
         filename = f"{self.company}_{self.search_query}_{datetime.datetime.now()}.csv"
         df.to_csv(filename, index=False)
         print(f"CSV file is saved with name " + filename)
-        
+
+
+
+    def subreader(self, tempDetail):
+        # logging.info("Extracting sub-skills from experience...")
+        """
+        Helper function to extract sub-skills from nested structures under experience.
+
+        Args:
+            tempDetail (dict): Experience entry to append skills into.
+        """
+        temp = []
+        for count in range(1, 5):
+            try:
+                skill = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[3]/div/div/div[2]/div/div/main/section/div[2]/div/div[1]/ul/li[2]/div/div/div[2]/div[2]/ul/li/div/div/div[1]/ul/li[{count}]/div/div/div[2]/div[2]/ul/li[2]/div/ul/li/div/div/div/span[1]")))
+                temp.append(skill.text.split(":")[1].split("·"))
+            except Exception as e:
+                pass
+        tempDetail["skill"] = temp
+
+
 
 
     def profilereader(self, peoples):
@@ -376,7 +420,8 @@ class LinkedInScraper:
 
             except Exception as e:
                 pass    
-            
+
+            self. get_contact_info(people + "/overlay/contact-info", personeDetails)
             self.education(people + "/details/education", personeDetails)
             self.experience(people + "/details/experience", personeDetails)
             personeDetails["Competancy"] = self.get_competancy(about, personeDetails["Experience"], personeDetails["Title"])
@@ -386,18 +431,6 @@ class LinkedInScraper:
         self.get_json(profiles)
         self.get_csv(profiles)
 
-
-    def get_json(self, profiles):
-        # logging.info("Exporting data to JSON...")
-        """
-        Reads and parses individual LinkedIn profiles.
-
-        Args:
-            peoples (list): List of profile URLs.
-        """
-        with open(f"{self.company}_{self.search_query}_{datetime.datetime.now()}.json", 'w') as file:
-            json.dump(profiles, file, indent=4)
-        print(f"Json file is saved with name " + file.name)
 
     def scraper(self):
         # logging.info("Starting the scraping process...")
@@ -422,9 +455,9 @@ class LinkedInScraper:
 
         # Search for the company
         time.sleep(config.DELAYS["search"])
-        submitBTN = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, '/html/body/div[6]/header/div/div/div/div[1]/input')))
-        submitBTN.clear()
-        submitBTN.send_keys(self.company + Keys.ENTER)
+        searchBar = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, '/html/body/div[6]/header/div/div/div/div[1]/input')))
+        searchBar.clear()
+        searchBar.send_keys(self.company + Keys.ENTER)
 
         # Filter for companies, select first result, go to "People"
         selectCompany = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//button[text()='Companies']")))
@@ -443,7 +476,6 @@ class LinkedInScraper:
         selectPeople = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//div/textarea")))
         selectPeople.clear()
         selectPeople.send_keys(self.search_query + Keys.ENTER)
-
 
         # Scrape people links
         peopleList = []
@@ -488,10 +520,8 @@ class LinkedInScraper:
                     else:
                         break    
                         
-            
 
-
-        print("Scrapping is completed. PLease review your file")
+        print("Scrapping is completed. Please review your file")
         self.driver.quit()
 
 if __name__ == "__main__":
