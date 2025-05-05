@@ -57,6 +57,7 @@ class LinkedInScraper:
         get_competancy(about, experience,title): Uses an AI utility to infer a user's core competency based on experience and bio.
         get_csv(profiles, output_file): Saves all scraped profile data into a CSV file.
         get_json(profiles): Saves all scraped profile data into a JSON file.
+        scroll(): Used to implement smooth scrolling of the page to the bottom
         profilereader(peoples): Reads multiple LinkedIn profiles and aggregates the data.
         scraper(): Main function that starts the scraping workflow, including login, navigation, data collection, and file output.
 
