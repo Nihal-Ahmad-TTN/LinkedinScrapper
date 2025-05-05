@@ -408,6 +408,26 @@ class LinkedInScraper:
         df.to_csv(filename, index=False)
         print(f"CSV file is saved with name " + filename)
 
+    def scroll(self):
+        """
+        Method to implement smooth scrolling of the page
+        """
+        scroll_duration = 2
+        steps = 100
+
+        # Get current and maximum scroll position
+        start = self.driver.execute_script("return window.pageYOffset;")
+        end = self.driver.execute_script("return document.body.scrollHeight;")
+        scroll_distance = end - start
+        step_size = scroll_distance / steps
+        delay = scroll_duration / steps
+
+        # Scroll in steps to simulate animation
+        for i in range(steps):
+            y = start + step_size * i
+            self.driver.execute_script(f"window.scrollTo(0, {y});")
+            time.sleep(delay)
+
 
 
     def subreader(self, tempDetail):
@@ -495,7 +515,10 @@ class LinkedInScraper:
             self.login()    
             time.sleep(config.DELAYS["security_check"])
             self.save_cookies()
-  
+        
+
+
+        
         # Search for the company
         time.sleep(config.DELAYS["search"])
         searchBar = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, '/html/body/div[6]/header/div/div/div/div[1]/input')))
@@ -531,8 +554,7 @@ class LinkedInScraper:
             count += 1
             try:
 
-                time.sleep(config.DELAYS['scroll'])
-                self.driver.execute_script("window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});")
+                self.scroll()
                 time.sleep(config.DELAYS['scroll'])
 
                 profileData = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f'//*[@id="org-people-profile-card__profile-image-{count}"]')))
@@ -562,9 +584,9 @@ class LinkedInScraper:
                     time.sleep(config.DELAYS["load_more"])
                     loadmore = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[6]/div[3]/div/div[2]/div/div[2]/main/div[2]/div/div/div[2]/div/div[2]/div/button")))
                     loadmore.send_keys(Keys.ENTER)
-                    self.driver.execute_script("window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});")
-                    time.sleep(config.DELAYS['scroll'])
-
+                    self.scroll()
+                    time.sleep(config.DELAYS["scroll"])
+                    
                 except Exception as e:
                     if len(peopleList) > 0:
                         self.profilereader(peopleList)
