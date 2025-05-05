@@ -10,7 +10,7 @@ import random
 # API Key for Gemini AI
 # Replace with your actual API key
 # Ensure you have the required permissions and usage limits for the API
-API="AIzaSyDBr3wLAaGJWYiDGYLfsTVXqbwOTwIevV0"
+API="test"
 
 # File Paths
 # Path to the Cookie file where scraped data will be saved
