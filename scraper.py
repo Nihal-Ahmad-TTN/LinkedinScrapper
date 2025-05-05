@@ -198,7 +198,8 @@ class LinkedInScraper:
             try:
                 
                 heading = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//section/div/section[{count}]/h3"))).text
-                print("got heading")
+                if 'profile' in heading.lower().strip().split():
+                    continue
 
                 try:
                     content = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//section/div/section[{count}]/div/a"))).text
@@ -217,7 +218,6 @@ class LinkedInScraper:
                 break
         
         personDetails['Contact_info'] = contact_info
-        print(personDetails['contact_info'])
 
 
 
@@ -499,7 +499,6 @@ class LinkedInScraper:
 
         while True:
             count += 1
-            
             try:
                 time.sleep(config.DELAYS['scroll'])
                 profileData = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f'//*[@id="org-people-profile-card__profile-image-{count}"]')))
@@ -511,6 +510,7 @@ class LinkedInScraper:
                     if len(peopleList) == self.number:
                         self.profilereader(peopleList)
                         break
+                    
             #     else:
             #         notMemberCount += 1
             #         if (notMemberCount / count) > 0.5 and count == 10:
