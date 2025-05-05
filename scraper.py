@@ -191,6 +191,7 @@ class LinkedInScraper:
         """
         # logging.info("Extracting contact information...")
         self.driver.get(link)
+        time.sleep(config.DELAYS["contact_info"])
         contact_info = {}
         count = 0
         while True:
@@ -219,6 +220,12 @@ class LinkedInScraper:
         
         personDetails['Contact_info'] = contact_info
 
+        try:
+            self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//button[@aria-label='Dismiss']"))).send_keys(Keys.ENTER)
+        except Exception as e:
+            pass
+        time.sleep(config.DELAYS["profile"])
+
 
 
 
@@ -232,8 +239,14 @@ class LinkedInScraper:
             personeDetails (dict): Dictionary to append education data into.
         """
         tempEducation=[]
+
+        education = self.driver.find_element(By.ID, "education")
+        self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", education)
+        time.sleep(config.DELAYS["scroll"])
+
         self.driver.get(link)
         time.sleep(config.DELAYS["education"])
+
 
         count = 0
         while True:
@@ -253,6 +266,12 @@ class LinkedInScraper:
             tempEducation.append(temp)
         personeDetails["Education"] = tempEducation
 
+        try:
+            self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//button[@aria-label='Back to the main profile page']"))).send_keys(Keys.ENTER)
+        except Exception as e:
+            pass
+        time.sleep(config.DELAYS["profile"])
+
 
 
 
@@ -265,6 +284,10 @@ class LinkedInScraper:
             link (str): Direct URL to the experience section.
             personeDetails (dict): Dictionary to append experience data into.
         """
+        experience = self.driver.find_element(By.ID, "experience")
+        self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", experience)
+        time.sleep(config.DELAYS["scroll"])
+
         self.driver.get(link)
         time.sleep(config.DELAYS["experience"])
 
@@ -303,7 +326,14 @@ class LinkedInScraper:
             personExpDetails.append(tempDetail)
      
         personeDetails["Total_Experiance"] = self.exp_count(tempyear)    
-        personeDetails["Experience"] = personExpDetails             
+        personeDetails["Experience"] = personExpDetails  
+
+        try:
+            self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f"//button[@aria-label='Back to the main profile page']"))).send_keys(Keys.ENTER)
+        except Exception as e:
+            pass     
+        time.sleep(config.DELAYS["profile"])      
+
 
     def get_competancy(self, about, experience,title):
         # logging.info("Generating competency summary using AI...")
@@ -435,7 +465,7 @@ class LinkedInScraper:
             except Exception as e:
                 pass    
 
-            self. get_contact_info(people + "/overlay/contact-info", personeDetails)
+            self.get_contact_info(people + "/overlay/contact-info", personeDetails)
             self.education(people + "/details/education", personeDetails)
             self.experience(people + "/details/experience", personeDetails)
             personeDetails["Competancy"] = self.get_competancy(about, personeDetails["Experience"], personeDetails["Title"])
@@ -465,8 +495,7 @@ class LinkedInScraper:
             self.login()    
             time.sleep(config.DELAYS["security_check"])
             self.save_cookies()
-            
-
+  
         # Search for the company
         time.sleep(config.DELAYS["search"])
         searchBar = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, '/html/body/div[6]/header/div/div/div/div[1]/input')))
@@ -497,10 +526,15 @@ class LinkedInScraper:
         notMemberCount = 0
         counter = 0
 
+
         while True:
             count += 1
             try:
+
                 time.sleep(config.DELAYS['scroll'])
+                self.driver.execute_script("window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});")
+                time.sleep(config.DELAYS['scroll'])
+
                 profileData = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, f'//*[@id="org-people-profile-card__profile-image-{count}"]')))
                 temp = profileData.get_attribute('href')
                 if temp is not None:
@@ -510,7 +544,7 @@ class LinkedInScraper:
                     if len(peopleList) == self.number:
                         self.profilereader(peopleList)
                         break
-                    
+
             #     else:
             #         notMemberCount += 1
             #         if (notMemberCount / count) > 0.5 and count == 10:
@@ -523,10 +557,13 @@ class LinkedInScraper:
 
 
             except Exception as e:
+
                 try:
                     time.sleep(config.DELAYS["load_more"])
                     loadmore = self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[6]/div[3]/div/div[2]/div/div[2]/main/div[2]/div/div/div[2]/div/div[2]/div/button")))
                     loadmore.send_keys(Keys.ENTER)
+                    self.driver.execute_script("window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});")
+                    time.sleep(config.DELAYS['scroll'])
 
                 except Exception as e:
                     if len(peopleList) > 0:
